@@ -1,0 +1,140 @@
+================================================================================
+   📧 GMAIL SMTP - QUICK SETUP GUIDE
+   For: hichame.taoufik1@gmail.com
+================================================================================
+
+✅ WHAT'S BEEN DONE:
+- Installed nodemailer package
+- Configured Gmail SMTP in your code
+- Your emails will send from: hichame.taoufik1@gmail.com
+- Daily limit: 500 emails (FREE!)
+
+================================================================================
+   🚀 WHAT YOU NEED TO DO (10 MINUTES):
+================================================================================
+
+STEP 1: Enable 2-Factor Authentication
+---------------------------------------
+1. Go to: https://myaccount.google.com/security
+2. Click "2-Step Verification"
+3. Click "Get Started"
+4. Follow the steps (use your phone number)
+5. Complete setup
+
+
+STEP 2: Get App Password
+-------------------------
+1. Go back to: https://myaccount.google.com/security
+2. Click "App passwords" (under "Signing in to Google")
+3. If you don't see it, make sure 2FA is enabled first
+4. Select app: "Mail"
+5. Select device: "Other (Custom name)"
+6. Type: MAIA Workshop
+7. Click "Generate"
+8. COPY THE 16-CHARACTER PASSWORD (looks like: abcd efgh ijkl mnop)
+   ⚠️ SAVE IT NOW - You won't see it again!
+
+
+STEP 3: Create .env.local File
+-------------------------------
+In your project folder (C:\Users\hicha\Downloads\workshop), create a file named:
+
+    .env.local
+
+Paste this inside (replace with YOUR app password):
+
+EMAIL_USER=hichame.taoufik1@gmail.com
+EMAIL_PASSWORD=abcdefghijklmnop
+ADMIN_EMAIL=hichame.taoufik1@gmail.com
+
+⚠️ IMPORTANT:
+- Remove ALL SPACES from the app password
+- abcdefghijklmnop should be YOUR 16-character password
+- Don't include quotes
+
+
+STEP 4: Test It!
+-----------------
+1. Open terminal in project folder
+2. Run: npm run dev
+3. Go to: http://localhost:3000/register
+4. Fill out and submit the form
+5. Check your Gmail inbox for confirmation email! 📬
+
+
+================================================================================
+   📊 WHAT YOU GET:
+================================================================================
+
+✅ 500 emails per day (FREE!)
+✅ Emails sent from your Gmail: hichame.taoufik1@gmail.com
+✅ Registration confirmations sent automatically
+✅ Contact form messages sent to your Gmail
+✅ Professional email templates with MAIA branding
+
+
+================================================================================
+   🐛 TROUBLESHOOTING:
+================================================================================
+
+Issue: "Invalid login: 535-5.7.8 Username and Password not accepted"
+Solution: 
+  - Make sure you used APP PASSWORD, not your regular Gmail password
+  - Remove all spaces from app password
+  - Generate a new app password and try again
+
+
+Issue: "App Passwords" option not showing
+Solution:
+  - Enable 2FA first
+  - Wait a few minutes
+  - Sign out and sign back in
+
+
+Issue: Emails going to spam
+Solution:
+  - Test with small batches first
+  - Don't send too many at once
+  - Ask recipients to mark as "Not Spam"
+
+
+================================================================================
+   📚 MORE DETAILS:
+================================================================================
+
+See GMAIL_SETUP.md for complete documentation.
+
+
+================================================================================
+   ✅ CHECKLIST:
+================================================================================
+
+[ ] Enabled 2-Factor Authentication on Gmail
+[ ] Generated App Password (16 characters)
+[ ] Created .env.local file with credentials
+[ ] Tested locally (npm run dev)
+[ ] Received test confirmation email
+[ ] Ready to deploy!
+
+
+================================================================================
+   🆘 NEED HELP?
+================================================================================
+
+- Google Help: https://support.google.com/mail/answer/185833
+- Contact: hichame.taoufik1@gmail.com
+- Phone: +212 697 068 234
+
+
+================================================================================
+   🎉 YOU'RE READY!
+================================================================================
+
+Once you complete the 4 steps above, your workshop website will automatically
+send emails from your Gmail account!
+
+Daily Limit: 500 emails (perfect for your workshop!)
+Cost: FREE!
+
+Good luck with your MAIA 2025 Workshop! 🚀
+
