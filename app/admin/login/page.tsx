@@ -1,10 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+// Force dynamic rendering to avoid pre-render errors with useSearchParams
+export const dynamic = 'force-dynamic';
+
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FiLock, FiUser, FiKey, FiAlertTriangle } from 'react-icons/fi';
 
-export default function AdminLoginPage() {
+function AdminLoginInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const from = searchParams.get('from') || '/admin';
@@ -102,6 +105,18 @@ export default function AdminLoginPage() {
 
       </div>
     </div>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-neutral-50">
+        <p className="text-neutral-600">Loading…</p>
+      </div>
+    }>
+      <AdminLoginInner />
+    </Suspense>
   );
 }
 
