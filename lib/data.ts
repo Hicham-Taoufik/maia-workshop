@@ -37,7 +37,12 @@ export async function saveRegistration(registration: Registration): Promise<void
   const id = registration.id;
   const key = `registration:${id}`;
 
-  await kv.hset(key, { ...registration } as KVRegistration);
+  // Upstash does not support null hash values; omit null/undefined fields.
+  const cleaned = Object.fromEntries(
+    Object.entries(registration).filter(([, v]) => v !== null && v !== undefined)
+  ) as KVRegistration;
+
+  await kv.hset(key, cleaned);
   // Prepend to list so newest are first
   await kv.lpush(REGISTRATION_LIST_KEY, id);
 }

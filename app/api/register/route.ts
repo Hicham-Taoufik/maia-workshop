@@ -3,6 +3,12 @@ import { saveRegistration, generateConfirmationNumber } from '@/lib/data';
 import { Registration } from '@/types/registration';
 import { sendConfirmationEmail } from '@/lib/email';
 
+function optionalText(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  const v = value.trim();
+  return v.length ? v : undefined;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -30,9 +36,9 @@ export async function POST(request: NextRequest) {
       fullName: body.fullName,
       email: body.email,
       phone: body.phone,
-      organization: body.organization || undefined,
-      jobTitleDegree: body.jobTitleDegree || undefined,
-      questions: body.questions || undefined,
+      organization: optionalText(body.organization),
+      jobTitleDegree: optionalText(body.jobTitleDegree),
+      questions: optionalText(body.questions),
       createdAt: new Date().toISOString(),
       confirmationNumber: generateConfirmationNumber(),
     };
