@@ -1,13 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'password123';
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 export async function POST(request: NextRequest) {
   try {
+    // In production, require explicit credentials (avoid accidental defaults).
+    if (process.env.NODE_ENV === 'production' && (!ADMIN_USERNAME || !ADMIN_PASSWORD)) {
+      return NextResponse.json(
+        { error: 'Admin credentials are not configured in production' },
+        { status: 500 }
+      );
+    }
+
     const { username, password } = await request.json();
 
-    if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
+    // In development, fall back to defaults for convenience.
+    const expectedUser = ADMIN_USERNAME || 'admin';
+    const expectedPass = ADMIN_PASSWORD || 'password123';
+
+    if (username !== expectedUser || password !== expectedPass) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 

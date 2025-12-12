@@ -2,14 +2,20 @@
 import { Registration } from '@/types/registration';
 import nodemailer from 'nodemailer';
 
-// Create Gmail SMTP transporter
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER || 'hichame.taoufik1@gmail.com',
-    pass: process.env.EMAIL_PASSWORD || '', // App-specific password
-  },
-});
+function getGmailTransporter() {
+  const user = process.env.EMAIL_USER;
+  const pass = process.env.EMAIL_PASSWORD;
+
+  if (!user || !pass) return null;
+
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user,
+      pass, // App-specific password
+    },
+  });
+}
 
 /**
  * Send confirmation email to workshop registrant
@@ -17,7 +23,8 @@ const transporter = nodemailer.createTransport({
 export async function sendConfirmationEmail(registration: Registration): Promise<void> {
   try {
     // Only send if credentials are configured
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+    const transporter = getGmailTransporter();
+    if (!transporter) {
       console.log('⚠️ Gmail credentials not configured. Email would be sent to:', registration.email);
       return;
     }
@@ -127,7 +134,8 @@ export async function sendContactFormEmail(data: {
 }): Promise<void> {
   try {
     // Only send if credentials are configured
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+    const transporter = getGmailTransporter();
+    if (!transporter) {
       console.log('⚠️ Gmail credentials not configured. Contact form message from:', data.email);
       return;
     }
