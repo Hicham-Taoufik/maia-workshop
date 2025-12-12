@@ -3,6 +3,10 @@ import { Registration } from '@/types/registration';
 
 const REGISTRATION_LIST_KEY = 'registrations:list';
 
+// @vercel/kv generic helpers expect an object-like record type
+type KVRecord = Record<string, unknown>;
+type KVRegistration = Registration & KVRecord;
+
 /**
  * Fetch all registrations from Vercel KV.
  * Returns most recent first.
@@ -13,8 +17,8 @@ export async function getRegistrations(): Promise<Registration[]> {
 
   const records = await Promise.all(
     ids.map(async (id) => {
-      const data = await kv.hgetall<Registration>(`registration:${id}`);
-      return data || null;
+      const data = await kv.hgetall<KVRegistration>(`registration:${id}`);
+      return (data as Registration) || null;
     })
   );
 
@@ -33,7 +37,7 @@ export async function saveRegistration(registration: Registration): Promise<void
   const id = registration.id;
   const key = `registration:${id}`;
 
-  await kv.hset(key, registration);
+  await kv.hset(key, { ...registration } as KVRegistration);
   // Prepend to list so newest are first
   await kv.lpush(REGISTRATION_LIST_KEY, id);
 }
