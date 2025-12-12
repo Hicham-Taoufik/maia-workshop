@@ -3,7 +3,7 @@ import { getRegistrations } from '@/lib/data';
 
 export async function GET() {
   try {
-    const registrations = getRegistrations();
+    const registrations = await getRegistrations();
     return NextResponse.json({ registrations });
   } catch (error) {
     console.error('Error fetching registrations:', error);

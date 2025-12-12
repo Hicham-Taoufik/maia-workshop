@@ -1,45 +1,44 @@
+import { kv } from '@vercel/kv';
 import { Registration } from '@/types/registration';
-import fs from 'fs';
-import path from 'path';
 
-const dataFilePath = path.join(process.cwd(), 'data', 'registrations.json');
+const REGISTRATION_LIST_KEY = 'registrations:list';
 
-// Ensure data directory exists
-const ensureDataDir = () => {
-  const dataDir = path.join(process.cwd(), 'data');
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
-};
+/**
+ * Fetch all registrations from Vercel KV.
+ * Returns most recent first.
+ */
+export async function getRegistrations(): Promise<Registration[]> {
+  const ids = await kv.lrange<string>(REGISTRATION_LIST_KEY, 0, -1);
+  if (!ids || ids.length === 0) return [];
 
-// Read registrations from file
-export function getRegistrations(): Registration[] {
-  ensureDataDir();
-  
-  if (!fs.existsSync(dataFilePath)) {
-    return [];
-  }
-  
-  try {
-    const fileContent = fs.readFileSync(dataFilePath, 'utf-8');
-    return JSON.parse(fileContent);
-  } catch (error) {
-    console.error('Error reading registrations:', error);
-    return [];
-  }
+  const records = await Promise.all(
+    ids.map(async (id) => {
+      const data = await kv.hgetall<Registration>(`registration:${id}`);
+      return data || null;
+    })
+  );
+
+  return records
+    .filter((r): r is Registration => Boolean(r))
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
 }
 
-// Save registration to file
-export function saveRegistration(registration: Registration): void {
-  ensureDataDir();
-  
-  const registrations = getRegistrations();
-  registrations.push(registration);
-  
-  fs.writeFileSync(dataFilePath, JSON.stringify(registrations, null, 2));
+/**
+ * Save a registration into Vercel KV.
+ */
+export async function saveRegistration(registration: Registration): Promise<void> {
+  const id = registration.id;
+  const key = `registration:${id}`;
+
+  await kv.hset(key, registration);
+  // Prepend to list so newest are first
+  await kv.lpush(REGISTRATION_LIST_KEY, id);
 }
 
-// Generate confirmation number
+// Generate confirmation number (kept for compatibility, though we no longer display it)
 export function generateConfirmationNumber(): string {
   const timestamp = Date.now().toString(36).toUpperCase();
   const random = Math.random().toString(36).substring(2, 6).toUpperCase();

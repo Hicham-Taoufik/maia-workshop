@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     // Create registration
     const registration: Registration = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       fullName: body.fullName,
       email: body.email,
       phone: body.phone,
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Save registration
-    saveRegistration(registration);
+    await saveRegistration(registration);
 
     // Send confirmation email (non-blocking)
     try {
