@@ -11,6 +11,17 @@ export default function AdminPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
 
+  const csvEscape = (value: unknown) => {
+    const s = value === null || value === undefined ? '' : String(value);
+    // CSV escaping: wrap in quotes and double any quotes.
+    return `"${s.replace(/"/g, '""')}"`;
+  };
+
+  const csvPhone = (phone: string) => {
+    // Excel often treats values starting with + as formulas; prefix with tab to force text.
+    return `\t${phone}`;
+  };
+
   useEffect(() => {
     fetchRegistrations();
   }, []);
@@ -51,7 +62,7 @@ export default function AdminPage() {
     const rows = filteredRegistrations.map(reg => [
       reg.fullName,
       reg.email,
-      reg.phone,
+      csvPhone(reg.phone),
       reg.organization || '',
       reg.jobTitleDegree || '',
       reg.questions || '',
@@ -60,7 +71,7 @@ export default function AdminPage() {
 
     const csvContent = [
       headers.join(','),
-      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+      ...rows.map(row => row.map(csvEscape).join(','))
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -80,7 +91,8 @@ export default function AdminPage() {
       reg.fullName.toLowerCase().includes(term) ||
       reg.email.toLowerCase().includes(term) ||
       (reg.organization && reg.organization.toLowerCase().includes(term)) ||
-      (reg.jobTitleDegree && reg.jobTitleDegree.toLowerCase().includes(term));
+      (reg.jobTitleDegree && reg.jobTitleDegree.toLowerCase().includes(term)) ||
+      (reg.questions && reg.questions.toLowerCase().includes(term));
     
     return matchesSearch;
   });
@@ -174,6 +186,9 @@ export default function AdminPage() {
                     Job Title/Role and Degree
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Questions/Comments
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Registered
                   </th>
                 </tr>
@@ -181,7 +196,7 @@ export default function AdminPage() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredRegistrations.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
                       No registrations found
                     </td>
                   </tr>
@@ -215,6 +230,11 @@ export default function AdminPage() {
                         <span className="text-sm text-gray-900">
                           {reg.jobTitleDegree || '-'}
                         </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-900 max-w-md whitespace-pre-wrap break-words">
+                          {reg.questions?.trim() ? reg.questions : '-'}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {new Date(reg.createdAt).toLocaleDateString()}
