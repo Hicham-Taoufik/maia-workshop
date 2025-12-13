@@ -123,7 +123,7 @@ export default function MultiStepForm() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-medium p-8 border border-neutral-200">
+      <form onSubmit={handleSubmit} className="bg-white text-neutral-900 rounded-2xl shadow-medium p-8 border border-neutral-200">
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
             {error}
@@ -148,7 +148,7 @@ export default function MultiStepForm() {
                 required
                 value={formData.fullName}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-neutral-300 rounded-lg bg-white text-neutral-900 placeholder:text-neutral-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                 placeholder="Enter your full name"
               />
             </div>
@@ -164,7 +164,7 @@ export default function MultiStepForm() {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-neutral-300 rounded-lg bg-white text-neutral-900 placeholder:text-neutral-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                 placeholder="your.email@example.com"
               />
             </div>
@@ -180,7 +180,7 @@ export default function MultiStepForm() {
                 required
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-neutral-300 rounded-lg bg-white text-neutral-900 placeholder:text-neutral-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                 placeholder="+212 697 068 234"
               />
             </div>
@@ -204,7 +204,7 @@ export default function MultiStepForm() {
                 name="organization"
                 value={formData.organization}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-neutral-300 rounded-lg bg-white text-neutral-900 placeholder:text-neutral-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                 placeholder="Your organization or company"
               />
             </div>
@@ -219,7 +219,7 @@ export default function MultiStepForm() {
                 name="jobTitleDegree"
                 value={formData.jobTitleDegree}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-neutral-300 rounded-lg bg-white text-neutral-900 placeholder:text-neutral-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                 placeholder="Your job title, role, and degree"
               />
             </div>
@@ -234,7 +234,7 @@ export default function MultiStepForm() {
                 rows={4}
                 value={formData.questions}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-neutral-300 rounded-lg bg-white text-neutral-900 placeholder:text-neutral-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                 placeholder="Any questions or comments you'd like to share..."
               />
             </div>
