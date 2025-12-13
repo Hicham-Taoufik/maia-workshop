@@ -213,11 +213,6 @@ export default function Home() {
                 <p className="text-lg text-neutral-500 font-semibold">To Be Announced</p>
               </div>
 
-              <p className="text-neutral-600 mb-6 leading-relaxed">
-                The second workshop session will cover advanced AI topics complementing the morning session. 
-                Details including the specific topic and instructor will be announced soon.
-              </p>
-
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
                 <p className="text-sm text-blue-800">
                   <strong>📢 Coming Soon:</strong> Register now to be notified when session details are announced.

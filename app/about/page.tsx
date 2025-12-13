@@ -144,13 +144,6 @@ export default function AboutPage() {
                 <span className="block text-xl text-neutral-500 mt-2">To Be Announced</span>
               </h3>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6">
-                <p className="text-neutral-700 leading-relaxed">
-                  The afternoon session will dive deeper into advanced AI applications and complement the morning workshop. 
-                  Specific topics and instructor details will be announced shortly.
-                </p>
-              </div>
-
               <div className="space-y-3 mb-6">
                 <p className="text-sm font-semibold text-neutral-600 uppercase tracking-wide">Expected Focus Areas:</p>
                 <ul className="space-y-2 text-neutral-600">
