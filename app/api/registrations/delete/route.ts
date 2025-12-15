@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { kv } from '@vercel/kv';
 
 const REGISTRATION_LIST_KEY = 'registrations:list';
 const REGISTRATION_KEY_PREFIX = 'registration:';
 
 // Check if user is authenticated as admin
-async function isAuthenticated(): Promise<boolean> {
-  const cookieStore = await cookies();
-  const session = cookieStore.get('admin_session');
-  return session?.value === 'authenticated';
+async function isAuthenticated(request: NextRequest): Promise<boolean> {
+  const authCookie = request.cookies.get('admin_auth');
+  return authCookie?.value === '1';
 }
 
 /**
@@ -19,7 +17,7 @@ async function isAuthenticated(): Promise<boolean> {
 export async function DELETE(request: NextRequest) {
   try {
     // Check authentication
-    if (!(await isAuthenticated())) {
+    if (!(await isAuthenticated(request))) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
