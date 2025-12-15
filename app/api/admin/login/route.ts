@@ -24,10 +24,10 @@ export async function POST(request: NextRequest) {
     }
 
     const response = NextResponse.json({ success: true });
-    // Set a simple auth cookie for the admin area
+    // Set a simple auth cookie for the admin area and API routes
     response.cookies.set('admin_auth', '1', {
       httpOnly: true,
-      path: '/admin',
+      path: '/', // Set to root so it's available for API routes too
       maxAge: 60 * 60 * 12, // 12 hours
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',
