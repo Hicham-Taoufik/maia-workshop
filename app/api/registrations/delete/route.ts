@@ -7,7 +7,19 @@ const REGISTRATION_KEY_PREFIX = 'registration:';
 // Check if user is authenticated as admin
 async function isAuthenticated(request: NextRequest): Promise<boolean> {
   const authCookie = request.cookies.get('admin_auth');
-  return authCookie?.value === '1';
+  const isAuth = authCookie?.value === '1';
+  
+  // Debug logging (remove in production if needed)
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('Auth check:', {
+      hasCookie: !!authCookie,
+      cookieValue: authCookie?.value,
+      allCookies: Array.from(request.cookies.getAll()).map(c => ({ name: c.name, value: c.value })),
+      isAuthenticated: isAuth
+    });
+  }
+  
+  return isAuth;
 }
 
 /**

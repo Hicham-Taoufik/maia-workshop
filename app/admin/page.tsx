@@ -59,10 +59,15 @@ export default function AdminPage() {
     try {
       const response = await fetch(`/api/registrations/delete?id=${id}`, {
         method: 'DELETE',
+        credentials: 'include', // Ensure cookies are sent
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete registration');
+        const errorData = await response.json().catch(() => ({}));
+        if (response.status === 401) {
+          throw new Error('Unauthorized. Please log out and log back in to refresh your session.');
+        }
+        throw new Error(errorData.error || 'Failed to delete registration');
       }
 
       // Refresh the list
@@ -85,10 +90,15 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/registrations/delete?id=all', {
         method: 'DELETE',
+        credentials: 'include', // Ensure cookies are sent
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete all registrations');
+        const errorData = await response.json().catch(() => ({}));
+        if (response.status === 401) {
+          throw new Error('Unauthorized. Please log out and log back in to refresh your session.');
+        }
+        throw new Error(errorData.error || 'Failed to delete all registrations');
       }
 
       const data = await response.json();
