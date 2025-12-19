@@ -13,16 +13,26 @@ export default function AdminPage() {
 
   const fetchRegistrations = useCallback(async () => {
     try {
-      // Add cache-busting to prevent stale data
-      const response = await fetch('/api/registrations', {
+      // Add timestamp query parameter to force cache-busting
+      const timestamp = Date.now();
+      const response = await fetch(`/api/registrations?_t=${timestamp}`, {
         cache: 'no-store',
+        method: 'GET',
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           'Pragma': 'no-cache',
+          'Expires': '0',
         },
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
-      setRegistrations(data.registrations || []);
+      const regs = data.registrations || [];
+      console.log(`[Admin Panel] Fetched ${regs.length} registrations at ${new Date().toISOString()}`);
+      setRegistrations(regs);
     } catch (error) {
       console.error('Error fetching registrations:', error);
     } finally {
@@ -112,9 +122,8 @@ export default function AdminPage() {
     return matchesSearch;
   });
 
-  const stats = {
-    total: registrations.length,
-  };
+  // Calculate stats directly from registrations - will update automatically
+  const totalRegistrations = registrations.length;
 
   if (loading) {
     return (
@@ -147,8 +156,17 @@ export default function AdminPage() {
         {/* Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-sm font-medium text-gray-500 mb-2">Total Registrations</h3>
-            <p className="text-3xl font-bold text-primary-600">{stats.total}</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-medium text-gray-500 mb-2">Total Registrations</h3>
+                <p className="text-3xl font-bold text-primary-600" key={totalRegistrations}>
+                  {totalRegistrations}
+                </p>
+              </div>
+              {loading && (
+                <FiRefreshCw className="animate-spin text-primary-600" />
+              )}
+            </div>
           </div>
         </div>
 
