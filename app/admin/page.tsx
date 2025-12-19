@@ -1,36 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Registration } from '@/types/registration';
-import { FiDownload, FiRefreshCw, FiSearch, FiMail, FiPhone, FiUser, FiLogOut, FiTrash2, FiAlertTriangle } from 'react-icons/fi';
+import { FiDownload, FiRefreshCw, FiSearch, FiMail, FiPhone, FiUser, FiLogOut } from 'react-icons/fi';
 import { useRouter } from 'next/navigation';
 
 export default function AdminPage() {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [deleting, setDeleting] = useState<string | null>(null);
-  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
   const router = useRouter();
 
-  const csvEscape = (value: unknown) => {
-    const s = value === null || value === undefined ? '' : String(value);
-    // CSV escaping: wrap in quotes and double any quotes.
-    return `"${s.replace(/"/g, '""')}"`;
-  };
-
-  const csvPhone = (phone: string) => {
-    // Excel often treats values starting with + as formulas; prefix with tab to force text.
-    return `\t${phone}`;
-  };
-
-  useEffect(() => {
-    fetchRegistrations();
-  }, []);
-
-  const fetchRegistrations = async () => {
+  const fetchRegistrations = useCallback(async () => {
     try {
-      const response = await fetch('/api/registrations');
+      // Add cache-busting to prevent stale data
+      const response = await fetch('/api/registrations', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+        },
+      });
       const data = await response.json();
       setRegistrations(data.registrations || []);
     } catch (error) {
@@ -38,7 +28,31 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchRegistrations();
+    
+    // Refresh data when page becomes visible (user switches back to tab)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchRegistrations();
+      }
+    };
+    
+    // Refresh data on window focus
+    const handleFocus = () => {
+      fetchRegistrations();
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [fetchRegistrations]);
 
   const handleLogout = async () => {
     try {
@@ -47,71 +61,6 @@ export default function AdminPage() {
       router.refresh();
     } catch (error) {
       console.error('Error logging out:', error);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this registration?')) {
-      return;
-    }
-
-    setDeleting(id);
-    try {
-      const response = await fetch(`/api/registrations/delete?id=${id}`, {
-        method: 'DELETE',
-        credentials: 'include', // Ensure cookies are sent
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        if (response.status === 401) {
-          throw new Error('Unauthorized. Please log out and log back in to refresh your session.');
-        }
-        throw new Error(errorData.error || 'Failed to delete registration');
-      }
-
-      // Refresh the list
-      await fetchRegistrations();
-    } catch (error) {
-      console.error('Error deleting registration:', error);
-      alert('Failed to delete registration. Please try again.');
-    } finally {
-      setDeleting(null);
-    }
-  };
-
-  const handleDeleteAll = async () => {
-    if (!confirm('⚠️ WARNING: This will delete ALL registrations. Are you absolutely sure?')) {
-      setShowDeleteAllConfirm(false);
-      return;
-    }
-
-    setDeleting('all');
-    try {
-      const response = await fetch('/api/registrations/delete?id=all', {
-        method: 'DELETE',
-        credentials: 'include', // Ensure cookies are sent
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        if (response.status === 401) {
-          throw new Error('Unauthorized. Please log out and log back in to refresh your session.');
-        }
-        throw new Error(errorData.error || 'Failed to delete all registrations');
-      }
-
-      const data = await response.json();
-      alert(`Successfully deleted ${data.deletedCount} registration(s)`);
-      
-      // Refresh the list
-      await fetchRegistrations();
-      setShowDeleteAllConfirm(false);
-    } catch (error) {
-      console.error('Error deleting all registrations:', error);
-      alert('Failed to delete registrations. Please try again.');
-    } finally {
-      setDeleting(null);
     }
   };
 
@@ -129,7 +78,7 @@ export default function AdminPage() {
     const rows = filteredRegistrations.map(reg => [
       reg.fullName,
       reg.email,
-      csvPhone(reg.phone),
+      reg.phone,
       reg.organization || '',
       reg.jobTitleDegree || '',
       reg.questions || '',
@@ -138,7 +87,7 @@ export default function AdminPage() {
 
     const csvContent = [
       headers.join(','),
-      ...rows.map(row => row.map(csvEscape).join(','))
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -158,8 +107,7 @@ export default function AdminPage() {
       reg.fullName.toLowerCase().includes(term) ||
       reg.email.toLowerCase().includes(term) ||
       (reg.organization && reg.organization.toLowerCase().includes(term)) ||
-      (reg.jobTitleDegree && reg.jobTitleDegree.toLowerCase().includes(term)) ||
-      (reg.questions && reg.questions.toLowerCase().includes(term));
+      (reg.jobTitleDegree && reg.jobTitleDegree.toLowerCase().includes(term));
     
     return matchesSearch;
   });
@@ -231,54 +179,8 @@ export default function AdminPage() {
               <FiDownload />
               Export CSV
             </button>
-            {registrations.length > 0 && (
-              <button
-                onClick={() => setShowDeleteAllConfirm(true)}
-                disabled={deleting === 'all'}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <FiTrash2 />
-                {deleting === 'all' ? 'Deleting...' : 'Delete All'}
-              </button>
-            )}
           </div>
         </div>
-
-        {/* Delete All Confirmation Modal */}
-        {showDeleteAllConfirm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="bg-red-100 p-3 rounded-full">
-                  <FiAlertTriangle className="text-red-600 text-2xl" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900">Delete All Registrations?</h3>
-                  <p className="text-sm text-gray-600">This action cannot be undone</p>
-                </div>
-              </div>
-              <p className="text-gray-700 mb-6">
-                You are about to delete <strong>all {registrations.length} registration(s)</strong>. This will permanently remove all data from the database.
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={handleDeleteAll}
-                  disabled={deleting === 'all'}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {deleting === 'all' ? 'Deleting...' : 'Yes, Delete All'}
-                </button>
-                <button
-                  onClick={() => setShowDeleteAllConfirm(false)}
-                  disabled={deleting === 'all'}
-                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Registrations Table */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -299,20 +201,14 @@ export default function AdminPage() {
                     Job Title/Role and Degree
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Questions/Comments
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Registered
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredRegistrations.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
+                    <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
                       No registrations found
                     </td>
                   </tr>
@@ -347,24 +243,8 @@ export default function AdminPage() {
                           {reg.jobTitleDegree || '-'}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900 max-w-md whitespace-pre-wrap break-words">
-                          {reg.questions?.trim() ? reg.questions : '-'}
-                        </div>
-                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {new Date(reg.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <button
-                          onClick={() => handleDelete(reg.id)}
-                          disabled={deleting === reg.id}
-                          className="text-red-600 hover:text-red-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
-                          title="Delete registration"
-                        >
-                          <FiTrash2 />
-                          {deleting === reg.id ? 'Deleting...' : 'Delete'}
-                        </button>
                       </td>
                     </tr>
                   ))
